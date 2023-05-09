@@ -69,23 +69,24 @@ class Bird:
     
     def move(self):
         self.tick_count = self.tick_count + 1 #because we move
-        displacement =self.velocity * self.tick_count #how many pixels we move up/down per frame, s = d/t
-
+        displacement =self.velocity * self.tick_count + 1.5 * self.tick_count**2 #how many pixels we move up/down per frame, s = d/t
+        print("DISPLACEMENT =", displacement)
         if displacement > 20: #we can jump maxx of 20 pixels
             displacement = 20
         else:
             displacement = displacement - 2 #going down
 
+        
         #now we modify the position of the bird
         self.y = self.y + displacement
 
         #tilt the bird
         if displacement > 0:
-            self.tilt = self.MAX_ROTATION
+            self.tilt = -self.MAX_ROTATION
         elif displacement == 0:
             self.tilt = 0
         else:
-            self.tilt = -self.MAX_ROTATION
+            self.tilt = self.MAX_ROTATION
 
 
     def draw(self, window):
@@ -117,11 +118,15 @@ def main():
 
     bird = Bird(START_POS_BIRD_X, START_POS_BIRD_Y)
 
+    clock_for_frame = pygame.time.Clock()
     while True:
+        clock_for_frame.tick(30)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 break
+            
+        bird.move()
         draw_window(window, bird)
 
 
