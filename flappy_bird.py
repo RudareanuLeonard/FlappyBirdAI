@@ -13,17 +13,14 @@ BIRD_IMAGES = [
     pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "bird3.png")))
     ]
 
-PIPE_IMAGE = [
-     pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "pipe.png")))
-]
+PIPE_IMAGE = pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "pipe.png")))
 
-BASE_IMAGE = [
-     pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "base.png")))
-]
 
-BG_IMAGE = [
-     pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "bg.png")))
-]
+BASE_IMAGE = pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "base.png")))
+
+
+BG_IMAGE = pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "bg.png")))
+
 
 
 def blitRotateCenter(surf, image, topleft, angle):
@@ -69,7 +66,7 @@ class Bird:
     
     def move(self):
         self.tick_count = self.tick_count + 1 #because we move
-        displacement =self.velocity * self.tick_count + 1.5 * self.tick_count**2 #how many pixels we move up/down per frame, s = d/t
+        displacement = self.velocity * self.tick_count + 1.5 * self.tick_count**2 #how many pixels we move up/down per frame, s = d/t
         print("DISPLACEMENT =", displacement)
         if displacement > 20: #we can jump maxx of 20 pixels
             displacement = 20
@@ -105,9 +102,51 @@ class Bird:
 
 
 
-def draw_window(window, bird):
-    window.blit(BG_IMAGE[0], (0,0))
+class Pipe:
+
+    def __init__(self, x):
+        self.x = x
+        self.y = 0
+        self.velocity = 3
+        self.BOTTOM_PIPE = PIPE_IMAGE
+        self.TOP_PIPE = pygame.transform.rotate(PIPE_IMAGE, 180) #rotate 180 degrees
+
+        self.gap = 80 
+
+        self.bottom_pipe_height = random.randint(30, 250)
+        self.top_pipe_height =  WINDOW_HEIGHT - self.bottom_pipe_height - self.gap
+
+
+
+    def move(self):
+        self.x = self.x - self.velocity
+
+    def collision(self, bird):
+        #if bird touch pipe -> collision
+        #if bird x == pipe x (but what about pipe width?) then we can check the y axis
+
+        if bird.x == self.x:
+            if bird.y in [0, self.bottom_pipe_height] or bird.y in [self.top_pipe_height, WINDOW_HEIGHT]:#collision happens
+                return True
+        
+        return False
+        
+        
+    def draw(self, window):
+        window.blit(self.BOTTOM_PIPE, (self.x, self.y))
+        window.blit(self.TOP_PIPE, (self.x, self.y))
+        
+
+
+
+
+
+
+def draw_window(window, bird, pipe):
+    window.blit(BG_IMAGE, (0,0))
     bird.draw(window)
+    pygame.display.update()
+    pipe.draw(window)
     pygame.display.update()
 
 def main():
@@ -117,6 +156,8 @@ def main():
     window = pygame.display.set_mode((WINDOW_HEIGHT, WINDOW_WIDTH))
 
     bird = Bird(START_POS_BIRD_X, START_POS_BIRD_Y)
+    pipe = Pipe(50)
+
 
     clock_for_frame = pygame.time.Clock()
     while True:
@@ -126,8 +167,8 @@ def main():
                 pygame.quit()
                 break
             
-        bird.move()
-        draw_window(window, bird)
+        #bird.move()
+        draw_window(window, bird, pipe)
 
 
 main()
