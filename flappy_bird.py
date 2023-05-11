@@ -70,7 +70,8 @@ class Bird:
     def move(self):
         self.tick_count = self.tick_count + 1 #because we move
         displacement = self.velocity * self.tick_count + 1.5 * self.tick_count**2 #how many pixels we move up/down per frame, s = d/t
-        print("DISPLACEMENT =", displacement)
+        
+        # print("DISPLACEMENT =", displacement)
         if displacement > 20: #we can jump maxx of 20 pixels
             displacement = 20
         else:
@@ -140,6 +141,8 @@ class Pipe:
         
         pygame.display.update()
 
+        print("PIPE DRAW")
+
     def collision(self, bird): # have to work on it
         #if bird touch pipe -> collision
         #if bird x == pipe x (but what about pipe width?) then we can check the y axis
@@ -208,7 +211,7 @@ def main():
     
 
     START_POS_BIRD_X = 0
-    START_POS_PIPE = START_POS_BIRD_X + 200
+    START_POS_PIPE = START_POS_BIRD_X + 300
     pipe = Pipe(START_POS_PIPE)
     START_POS_BIRD_Y = pipe.top_pipe_height - pipe.gap/2 #start bird from gap
     
@@ -218,10 +221,14 @@ def main():
 
     base = Base(pipe)
 
+    score = 0
 
+    pipe2 = Pipe(START_POS_PIPE * 1/5)
 
 
     clock_for_frame = pygame.time.Clock()
+
+    #### NEED TO MAKE PIPES COMING CONTINUOUS AND SMOOTHLY ####
     while True:
         clock_for_frame.tick(30)
         for event in pygame.event.get():
@@ -229,10 +236,18 @@ def main():
                 pygame.quit()
                 break
             
-        #bird.move()
+        bird.move()
+        pipe.move()
         base.move()
-        pipe.collision(bird)
         draw_window(window, bird, pipe, base)
+        
+        # if pipe.collision(bird) == True:
+        #     break
+        
+        #if pipe is off the screen we create a new pipe
+        if pipe.x < 350:
+            pipe = Pipe(START_POS_PIPE)
+            score = score + 1
 
 
 main()
