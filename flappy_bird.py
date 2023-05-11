@@ -117,7 +117,7 @@ class Pipe:
 
 
         bottom_pipe_image_before_resize =  PIPE_IMAGE
-        self.bottom_pipe_height = random.randint(10,250)
+        self.bottom_pipe_height = random.randint(10,320) + BASE_IMAGE.get_height()
         print("BOTTOM = " + str(self.bottom_pipe_height))
         self.bottom_pipe = pygame.transform.scale(bottom_pipe_image_before_resize, (PIPE_WIDTH, self.bottom_pipe_height))
 
@@ -155,15 +155,52 @@ class Pipe:
 
 
 class Base:
-    pass
+    
+    def __init__(self, pipe):
+        self.velocity = pipe.velocity
+        self.image = BASE_IMAGE
+        self.width = BASE_IMAGE.get_width()
+
+        #starting pos x
+        self.x = 0
+        
+        #now we are making a circular list of images
+        #we'll have 2 images that slowly replace each other for an infinite amount of time, that's why we use x2 for
+        self.x2 = self.width
+
+    def move(self):
+        self.x = self.x - self.velocity #move first image
+        self.x2 = self.x2 - self.velocity #move second image
+
+        if self.x == -self.width: #if first image is gone
+            self.x = self.width #we put it to the end
+            print("First image gone")
+        
+        if self.x2 == -self.width: #if second image is gone
+            self.x2 = self.width #we put it to the end
+            print("Second image gone")
+
+        # print("BASE MOVED")
+
+    def draw(self, window):
+        window.blit(self.image, (self.x, WINDOW_HEIGHT - self.image.get_height()/2.5))
+        pygame.display.update()
+
+        window.blit(self.image, (self.x2, WINDOW_HEIGHT - self.image.get_height()/2.5))
+        pygame.display.update()
 
 
-def draw_window(window, bird, pipe):
+
+
+def draw_window(window, bird, pipe, base):
     window.blit(BG_IMAGE, (0,0))
     bird.draw(window)
     pygame.display.update()
     pipe.draw(window, bird)
     pygame.display.update()
+    base.draw(window)
+    pygame.display.update
+
 
 def main():
 
@@ -179,6 +216,9 @@ def main():
 
     bird = Bird(START_POS_BIRD_X, START_POS_BIRD_Y)
 
+    base = Base(pipe)
+
+
 
 
     clock_for_frame = pygame.time.Clock()
@@ -190,8 +230,9 @@ def main():
                 break
             
         #bird.move()
+        base.move()
         pipe.collision(bird)
-        draw_window(window, bird, pipe)
+        draw_window(window, bird, pipe, base)
 
 
 main()
