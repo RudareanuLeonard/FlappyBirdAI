@@ -24,7 +24,7 @@ BASE_IMAGE = pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "ba
 
 BG_IMAGE = pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "bg.png")))
 
-
+SCORE = 0
 
 def blitRotateCenter(surf, image, topleft, angle):
     """
@@ -67,21 +67,41 @@ class Bird:
         self.height = self.y
 
     
-    def move(self):
-        self.tick_count = self.tick_count + 1 #because we move
-        displacement = self.velocity * self.tick_count + 1.5 * self.tick_count**2 #how many pixels we move up/down per frame, s = d/t
+    # def move(self):
+    #     self.tick_count = self.tick_count + 1 #because we move
+    #     displacement = self.velocity * self.tick_count + 1.5 * self.tick_count**2 #how many pixels we move up/down per frame, s = d/t
         
-        # print("DISPLACEMENT =", displacement)
-        if displacement > 20: #we can jump maxx of 20 pixels
-            displacement = 20
-        else:
-            displacement = displacement - 2 #going down
+    #     # print("DISPLACEMENT =", displacement)
+    #     if displacement > 20: #we can jump maxx of 20 pixels
+    #         displacement = 20
+    #     else:
+    #         displacement = displacement - 2 #going down
 
         
-        #now we modify the position of the bird
+    #     #now we modify the position of the bird
+    #     self.y = self.y + displacement
+
+    #     #tilt the bird
+    #     if displacement > 0:
+    #         self.tilt = -self.MAX_ROTATION
+    #     elif displacement == 0:
+    #         self.tilt = 0
+    #     else:
+    #         self.tilt = self.MAX_ROTATION
+
+
+
+    
+    def move(self):
+        self.tick_count += 1  # Increase the tick count
+
+        # Set displacement and velocity to zero
+        displacement = 0
+        self.velocity = 0
+
+        # Update the bird's position and tilt
         self.y = self.y + displacement
 
-        #tilt the bird
         if displacement > 0:
             self.tilt = -self.MAX_ROTATION
         elif displacement == 0:
@@ -119,7 +139,7 @@ class Pipe:
 
         bottom_pipe_image_before_resize =  PIPE_IMAGE
         self.bottom_pipe_height = random.randint(10,320) + BASE_IMAGE.get_height()
-        print("BOTTOM = " + str(self.bottom_pipe_height))
+        # print("BOTTOM = " + str(self.bottom_pipe_height))
         self.bottom_pipe = pygame.transform.scale(bottom_pipe_image_before_resize, (PIPE_WIDTH, self.bottom_pipe_height))
 
 
@@ -141,7 +161,7 @@ class Pipe:
         
         pygame.display.update()
 
-        print("PIPE DRAW")
+        # print("PIPE DRAW")
 
     def collision(self, bird): # have to work on it
         #if bird touch pipe -> collision
@@ -150,7 +170,7 @@ class Pipe:
         if bird.x >= self.x and bird.x <= self.x + PIPE_WIDTH:
             # print("COLLISION PART1")
             if bird.y <= self.bottom_pipe_height or bird.y >= self.top_pipe_height:
-                print("COLLISION PART2")
+                # print("COLLISION PART2")
                 return True
         
         return False
@@ -177,11 +197,11 @@ class Base:
 
         if self.x == -self.width: #if first image is gone
             self.x = self.width #we put it to the end
-            print("First image gone")
+            # print("First image gone")
         
         if self.x2 == -self.width: #if second image is gone
             self.x2 = self.width #we put it to the end
-            print("Second image gone")
+            # print("Second image gone")
 
         # print("BASE MOVED")
 
@@ -195,11 +215,12 @@ class Base:
 
 
 
-def draw_window(window, bird, pipe, base):
+def draw_window(window, bird, pipes, base):
     window.blit(BG_IMAGE, (0,0))
     bird.draw(window)
     pygame.display.update()
-    pipe.draw(window, bird)
+    for pipe in pipes:
+        pipe.draw(window, bird)
     pygame.display.update()
     base.draw(window)
     pygame.display.update
@@ -223,7 +244,15 @@ def main():
 
     score = 0
 
-    pipe2 = Pipe(START_POS_PIPE * 1/5)
+    pipe2 = Pipe(START_POS_PIPE + START_POS_PIPE * 0.9)
+
+    pipe3 = Pipe(pipe2.x + START_POS_PIPE * 0.9)
+
+    print("PIPE1 = " + str(pipe.x))
+    print("PIPE2 = " + str(pipe2.x))
+
+
+    pipes = [pipe, pipe2]
 
 
     clock_for_frame = pygame.time.Clock()
@@ -237,17 +266,24 @@ def main():
                 break
             
         bird.move()
-        pipe.move()
+        # pipe.move()
         base.move()
-        draw_window(window, bird, pipe, base)
+        for pipe in pipes:
+            pipe.move()
+            #if bird went through the pipe, we have to create another one and put it in the list
+            if pipe.x < 0:
+                print("ENTERED HERE")
+                pipe = pipe2
+                pipe2 = pipe3
+                pipe3 = Pipe(pipe2.x + START_POS_PIPE * 0.9)
+                pipes = [pipe, pipe2, pipe3]
+                
+                print("PIPES X'es = " + str(pipe.x) + " " + str(pipe2.x) + " " + str(pipe3.x))
+
+ 
+        draw_window(window, bird, pipes, base)
         
-        # if pipe.collision(bird) == True:
-        #     break
-        
-        #if pipe is off the screen we create a new pipe
-        if pipe.x < 350:
-            pipe = Pipe(START_POS_PIPE)
-            score = score + 1
+       
 
 
 main()
