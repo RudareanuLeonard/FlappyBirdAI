@@ -26,6 +26,9 @@ BG_IMAGE = pygame.transform.scale2x(pygame.image.load(os.path.join("imgs", "bg.p
 
 SCORE = 0
 
+
+CONFIG_FILE_PATH = "./config_file.txt"
+
 def blitRotateCenter(surf, image, topleft, angle):
     """
     Rotate a surface and blit it to the window
@@ -226,6 +229,8 @@ def draw_window(window, bird, pipes, base):
     pygame.display.update
 
 
+
+
 def main():
 
   
@@ -286,4 +291,21 @@ def main():
        
 
 
+
+
+
+
 main()
+
+
+
+def run():
+    values_from_headers = neat.config.Config(neat.DefaultGenome, neat.DefaultSpeciesSet, neat.DefaultStagnation, neat.DefaultReproduction)
+
+    population = neat.Population(values_from_headers)
+
+    population.add_reporter(neat.StdOutReporter(True))
+    stats = neat.StatisticsReporter() #get the statistics
+    population.add_reporter(stats) #dispaly the statistics
+
+    winner = population.run(main, 50)
